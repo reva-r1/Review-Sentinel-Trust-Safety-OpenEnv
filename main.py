@@ -217,6 +217,10 @@ async def analyze_custom_review(req: CustomReviewRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == "__main__":
+def main():
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
+    port = int(os.getenv("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
+if __name__ == "__main__":
+    main()
