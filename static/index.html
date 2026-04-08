@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Sentinel | AI Moderator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">RS</div>
+            <div>
+                <h1>Review Sentinel</h1>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <button class="theme-toggle" id="theme-toggle" title="Toggle Light/Dark Mode">
+                <svg id="sun-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+            <div class="status-badge">
+                <div class="badge-dot"></div>
+                <span>ACTIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="sidebar">
+            <div class="glass-card">
+                <span class="card-title">Access Control</span>
+                <div class="provider-selector">
+                    <button class="provider-btn active" data-provider="openai">OpenAI</button>
+                    <button class="provider-btn" data-provider="groq">Groq</button>
+                </div>
+                <input type="password" id="api-key" placeholder="OpenAI API Key">
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 0.5rem;">Key is handled securely and not stored.</p>
+            </div>
+
+            <div class="glass-card">
+                <span class="card-title">Task Selection</span>
+                <div class="task-selector">
+                    <button class="task-btn active" data-task="easy">
+                        <span class="task-btn-title">Easy</span>
+                        <span class="task-btn-desc">High signal reviews</span>
+                    </button>
+                    <button class="task-btn" data-task="medium">
+                        <span class="task-btn-title">Medium</span>
+                        <span class="task-btn-desc">Subtle spam & toxicity</span>
+                    </button>
+                    <button class="task-btn" data-task="hard">
+                        <span class="task-btn-title">Hard</span>
+                        <span class="task-btn-desc">Deep sarcasm & fake reviews</span>
+                    </button>
+                    <button class="task-btn" data-task="interactive" style="border-top: 1px solid var(--border-color); border-radius: 0 0 8px 8px; margin-top: 0.5rem; background: rgba(128, 128, 128, 0.1);">
+                        <span class="task-btn-title">Interactive Mode</span>
+                        <span class="task-btn-desc">Test custom reviews live</span>
+                    </button>
+                </div>
+                <button class="run-btn" id="run-task-btn">RUN INSPECTION</button>
+            </div>
+
+            <div class="glass-card">
+                <span class="card-title">Environment Info</span>
+                <p style="font-size: 0.75rem; line-height: 1.6; color: var(--text-dim);">
+                    Review Sentinel is a Trust & Safety environment for benchmarking AI moderation agents.
+                </p>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="stats-grid">
+                <div class="glass-card">
+                    <div class="stat-label">FINAL SCORE</div>
+                    <div class="stat-val" id="current-score">0.00</div>
+                </div>
+                <div class="glass-card">
+                    <div class="stat-label">REVIEWS MODERATED</div>
+                    <div class="stat-val" id="steps-taken">0 / 0</div>
+                </div>
+                <div class="glass-card">
+                    <div class="stat-label">AVG PRECISION</div>
+                    <div class="stat-val" id="avg-reward">0.00</div>
+                </div>
+            </div>
+
+            <div class="glass-card transcript-card">
+                <div class="transcript-header" style="display:flex; justify-content:space-between; margin-bottom: 1rem;">
+                    <span class="card-title" style="margin:0;">MODERATION LOG</span>
+                    <span id="inspector-loader" class="pulse" style="display: none; font-size: 0.7rem; font-weight: 700;">INSPECTING...</span>
+                </div>
+                <div id="interactive-input-area" style="display: none; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                    <textarea id="custom-review-text" rows="3" placeholder="Type a toxic, sarcastic, or fake spam review here..." style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); font-size: 0.9rem; resize: none;"></textarea>
+                    <div style="display: flex; gap: 1rem;">
+                        <select id="expected-sentiment" style="flex: 1; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main);">
+                            <option value="">Expected Sentiment...</option>
+                            <option value="positive">Positive</option>
+                            <option value="negative">Negative</option>
+                            <option value="neutral">Neutral</option>
+                        </select>
+                        <select id="expected-decision" style="flex: 1; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main);">
+                            <option value="">Expected Decision...</option>
+                            <option value="allow">Allow</option>
+                            <option value="flag">Flag</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="transcript-scroll" id="transcript">
+                    <div style="text-align: center; color: var(--text-dim); padding: 5rem 0; font-size: 0.85rem;">
+                        Select task to begin live moderation trace.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

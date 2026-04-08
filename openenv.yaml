@@ -1,0 +1,47 @@
+name: review-sentiment-env
+version: "1.0.0"
+description: >
+  A Trust & Safety environment where an AI agent must classify customer review
+  sentiment (positive/negative/neutral) and flag policy-violating content
+  (spam, toxicity, fake reviews). Includes 3 difficulty levels.
+
+entrypoint: app.env:ReviewSentimentEnv
+
+models:
+  observation:
+    module: app.models
+    class: Observation
+    fields:
+      review: string
+
+  action:
+    module: app.models
+    class: Action
+    fields:
+      sentiment: "positive | negative | neutral"
+      decision: "allow | flag"
+
+  reward:
+    module: app.models
+    class: Reward
+    fields:
+      sentiment_reward: float
+      decision_reward: float
+      total: float
+
+tasks:
+  - name: easy
+    description: "5 clearly positive/negative reviews with 1 obvious spam. No ambiguity."
+    num_reviews: 5
+
+  - name: medium
+    description: "6 mixed-tone reviews with subtle spam and toxicity to detect."
+    num_reviews: 6
+
+  - name: hard
+    description: "10 reviews with sarcasm, subtle tone, fake reviews, and hidden spam."
+    num_reviews: 10
+
+  - name: interactive
+    description: "User-generated custom test reviews with dynamically defined expected sentiment and decisions."
+    num_reviews: "variable"
