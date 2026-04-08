@@ -20,12 +20,13 @@ from app.models import Action
 from app.graders import grade_easy, grade_medium, grade_hard
 
 # ── Config ────────────────────────────────────────────────────────────────────
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN = os.getenv("HF_TOKEN")
+HF_TOKEN = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 
 # Optional — if you use from_docker_image():
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
+IMAGE_NAME = os.getenv("IMAGE_NAME") or LOCAL_IMAGE_NAME
 
 BENCHMARK = "review-sentiment-env"
 MAX_STEPS = 15  # generous upper bound for any task
@@ -90,17 +91,17 @@ def get_agent_action(client: OpenAI, review_text: str, history: List[str]) -> Ac
 
     messages.append({"role": "user", "content": f"Review: {review_text}"})
 
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=messages,
-        temperature=0.0,
-        max_tokens=100,
-    )
-
-    raw = response.choices[0].message.content.strip()
-
-    # Parse JSON from the response
     try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=messages,
+            temperature=0.0,
+            max_tokens=100,
+        )
+
+        raw = response.choices[0].message.content.strip()
+
+        # Parse JSON from the response
         # Handle cases where model wraps in markdown code blocks
         if raw.startswith("```"):
             raw = raw.split("```")[1]
@@ -120,8 +121,10 @@ def get_agent_action(client: OpenAI, review_text: str, history: List[str]) -> Ac
 
         return Action(sentiment=sentiment, decision=decision)
 
-    except (json.JSONDecodeError, KeyError, AttributeError):
-        # Fallback if LLM gives garbage
+    except Exception as exc:
+        # Fallback if LLM request fails or gives garbage
+        # This prevents unhandled exceptions from crashing the evaluation
+        print(f"[DEBUG] agent error: {exc}", flush=True)
         return Action(sentiment="neutral", decision="allow")
 
 
@@ -144,24 +147,28 @@ async def run_task(client: OpenAI, env: ReviewSentimentEnv, task_name: str):
             if result.done:
                 break
 
-            action = get_agent_action(client, review_text, history)
-            action_str = json.dumps({"sentiment": action.sentiment, "decision": action.decision})
+            try:
+                action = get_agent_action(client, review_text, history)
+                action_str = json.dumps({"sentiment": action.sentiment, "decision": action.decision})
 
-            result = await env.step(action)
+                result = await env.step(action)
 
-            reward = result.reward or 0.0
-            done = result.done
-            error = None
+                reward = result.reward or 0.0
+                done = result.done
+                error = None
 
-            rewards.append(reward)
-            steps_taken = step
+                rewards.append(reward)
+                steps_taken = step
 
-            log_step(step=step, action=action_str, reward=reward, done=done, error=error)
+                log_step(step=step, action=action_str, reward=reward, done=done, error=error)
 
-            history.append(f"Review: {review_text} -> {action_str} (reward: {reward:.2f})")
-            review_text = result.observation.review
+                history.append(f"Review: {review_text} -> {action_str} (reward: {reward:.2f})")
+                review_text = result.observation.review
 
-            if done:
+                if done:
+                    break
+            except Exception as e:
+                log_step(step=step, action="error", reward=0.0, done=True, error=str(e))
                 break
 
         # Grade using the appropriate grader
