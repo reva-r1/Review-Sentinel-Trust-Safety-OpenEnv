@@ -15,6 +15,24 @@ from app.tasks import load_task
 
 app = FastAPI(title="Review Sentinel Dashboard")
 
+# --- OpenEnv Required Endpoints ---
+
+env = ReviewSentimentEnv()
+
+@app.post("/reset")
+async def reset(task: str = Query("easy")):
+    result = await env.reset(task=task)
+    return result.model_dump()
+
+@app.post("/step")
+async def step(action: Action):
+    result = await env.step(action)
+    return result.model_dump()
+
+@app.get("/state")
+async def state():
+    return env.state().model_dump()
+
 # Mount the static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
