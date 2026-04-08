@@ -39,7 +39,7 @@ class ReviewSentimentEnv:
         first_review = self._reviews[0]["review"]
         return StepResult(
             observation=Observation(review=first_review),
-            reward=None,
+            reward=0.0,
             done=False,
             info={"task": task, "total_reviews": len(self._reviews)},
         )

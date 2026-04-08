@@ -40,10 +40,9 @@ class EnvState(BaseModel):
     cumulative_reward: float
     done: bool
 
-
+ 
 class StepResult(BaseModel):
-    """The result returned after each step."""
     observation: Observation
-    reward: Optional[float]
+    reward: float
     done: bool
-    info: Optional[dict]
+    info: dict

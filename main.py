@@ -22,12 +22,26 @@ env = ReviewSentimentEnv()
 @app.post("/reset")
 async def reset(task: str = Query("easy")):
     result = await env.reset(task=task)
-    return result.model_dump()
+    return {
+        "observation": {
+            "review": result.observation.review
+        },
+        "reward": 0.0,
+        "done": False,
+        "info": result.info or {}
+    }
 
 @app.post("/step")
 async def step(action: Action):
     result = await env.step(action)
-    return result.model_dump()
+    return {
+        "observation": {
+            "review": result.observation.review
+        },
+        "reward": float(result.reward),
+        "done": result.done,
+        "info": result.info or {}
+    }
 
 @app.get("/state")
 async def state():
