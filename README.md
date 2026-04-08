@@ -89,7 +89,7 @@ Each step awards up to **1.0 points**, split evenly:
 - Includes subtle spam (external link in a positive review)
 - Includes toxicity (abusive personal attack)
 
-### Hard (8 reviews)
+### Hard (10 reviews)
 - Heavy sarcasm disguised as positive reviews
 - Fake paid/incentivized reviews
 - Hidden spam (Telegram promotions embedded in glowing reviews)
