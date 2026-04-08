@@ -1,10 +1,12 @@
-<<<<<<< HEAD
 ---
 title: Review Sentinel OpenEnv
 emoji: 🛡️
 colorFrom: blue
 colorTo: purple
 sdk: docker
+app_file: main.py
+pinned: false
+---
 tags:
   - openenv
 ---
