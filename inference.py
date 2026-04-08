@@ -21,8 +21,11 @@ from app.graders import grade_easy, grade_medium, grade_hard
 
 # ── Config ────────────────────────────────────────────────────────────────────
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-API_KEY = os.getenv("HF_TOKEN", os.getenv("OPENAI_API_KEY", ""))
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Optional — if you use from_docker_image():
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 
 BENCHMARK = "review-sentiment-env"
 MAX_STEPS = 15  # generous upper bound for any task
@@ -172,7 +175,7 @@ async def run_task(client: OpenAI, env: ReviewSentimentEnv, task_name: str):
 
 
 async def main():
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
     env = ReviewSentimentEnv()
 
     print("=" * 60)
