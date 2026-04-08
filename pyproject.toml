@@ -1,0 +1,16 @@
+[project]
+name = "review-sentiment-env"
+version = "0.1.0"
+description = "OpenEnv Trust & Safety review sentiment environment"
+authors = [
+  { name = "Shankar","Manoj kumar R", "Paritosh N" }
+]
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "pydantic",
+  "openai"
+]
+
+[tool.setuptools]
+packages = ["app"]
