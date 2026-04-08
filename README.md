@@ -1,3 +1,12 @@
+---
+title: Review Sentinel OpenEnv
+emoji: 🛡️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+tags:
+  - openenv
+---
 # review-sentiment-env
 
 ![Review Sentinel Dashboard](./screenshot.png)
