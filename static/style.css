@@ -392,3 +392,40 @@ input {
     from { opacity: 0.4; }
     to { opacity: 1; }
 }
+
+/* Category & Reasoning Styles */
+.category-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    background: var(--border-color);
+    color: var(--text-dim);
+    font-weight: 800;
+}
+
+.category-badge.safe { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.category-badge.toxicity { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+.category-badge.spam { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.category-badge.phishing { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+
+.reason-box {
+    background: rgba(128, 128, 128, 0.05);
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.reason-label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+}
+
+.reason-text {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-main);
+}

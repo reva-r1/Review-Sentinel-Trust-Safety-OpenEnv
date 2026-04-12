@@ -81,26 +81,36 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const showReward = step !== 'MANUAL' || data.hasExpected;
         
+        const category = data.action.category || "Safe";
+        const categoryClass = category.toLowerCase();
+        
         entry.innerHTML = `
             <div class="entry-header">
-                <span>${step === 'MANUAL' ? 'CUSTOM INPUT' : 'STEP ' + step}</span>
-                ${showReward ? `<span class="reward-pill">+${reward.toFixed(2)} pts</span>` : ''}
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span>${step === 'MANUAL' ? 'CUSTOM INPUT' : 'STEP ' + step}</span>
+                    <span class="category-badge ${categoryClass}">${category.toUpperCase()}</span>
+                </div>
+                ${step === 'MANUAL' ? '' : `<span class="reward-pill">+${reward.toFixed(2)} pts</span>`}
             </div>
             <div class="entry-review">"${review}"</div>
+            <div class="reason-box">
+                <span class="reason-label">POLICY REASONING</span>
+                <p class="reason-text">${data.action.reason || "Analyzing policy compliance..."}</p>
+            </div>
             <div class="entry-tags">
                 <div class="tag">
-                    <span class="tag-label">AI SENTIMENT</span>
+                    <span class="tag-label">SENTIMENT</span>
                     <span class="sentiment-val ${action.sentiment}">${action.sentiment.toUpperCase()}</span>
                 </div>
                 <div class="tag">
-                    <span class="tag-label">AI DECISION</span>
+                    <span class="tag-label">DECISION</span>
                     <span class="decision-val ${action.decision}">${action.decision.toUpperCase()}</span>
                 </div>
             </div>
-            ${showReward ? `
+            ${step === 'MANUAL' ? '' : `
             <div class="reward-bar-container">
                 <div class="reward-bar-fill" style="width: ${reward * 100}%"></div>
-            </div>` : ''}
+            </div>`}
         `;
 
         transcript.prepend(entry);

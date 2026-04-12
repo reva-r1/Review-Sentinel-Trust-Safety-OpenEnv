@@ -225,7 +225,8 @@ async def analyze_custom_review(req: CustomReviewRequest):
 
 def main():
     import uvicorn
-    port = int(os.getenv("PORT", 7860))
+    # Default to 8000 locally, but use the system's PORT (7860) on Hugging Face
+    port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
