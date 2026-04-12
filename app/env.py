@@ -92,6 +92,8 @@ class ReviewSentimentEnv:
             review=current["review"],
             predicted_sentiment=action.sentiment,
             predicted_decision=action.decision,
+            predicted_reason=action.reason,
+            predicted_category=action.category or "Safe",
             true_sentiment=true_sentiment,
             true_decision=true_decision,
             reward=total_reward,

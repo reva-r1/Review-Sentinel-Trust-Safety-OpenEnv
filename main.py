@@ -62,19 +62,23 @@ GRADERS = {
 }
 
 SYSTEM_PROMPT = """You are a Trust & Safety review moderator.
-
-For each customer review you receive, you must return a JSON object with exactly two fields:
-
-1. "sentiment": classify the review as "positive", "negative", or "neutral"
-2. "decision": decide whether to "allow" the review or "flag" it for moderation
-
-Flag a review if it contains:
-- Spam or suspicious links
-- Promotional or paid content
-- Abusive language
-
-IMPORTANT: Return ONLY the raw JSON object. Do not explain your choice.
-Example: {"sentiment": "positive", "decision": "allow"}"""
+ 
+ For each customer review you receive, you must return a JSON object with exactly four fields:
+ 
+ 1. "sentiment": classify the review as "positive", "negative", or "neutral"
+ 2. "decision": decide whether to "allow" the review or "flag" it for moderation
+ 3. "reason": a concise explanation of why you made this decision
+ 4. "category": a specific category for the review (e.g., "Safe", "Toxicity", "Spam", "Phishing", "Hate Speech", "Self-Promotion", "Fake Review")
+ 
+ Flag a review if it contains:
+ - Spam or suspicious links
+ - Promotional or paid content
+ - Abusive language
+ - Fake or misleading claims
+ - Direct attacks on people
+ 
+ IMPORTANT: Return ONLY the raw JSON object. No other text.
+ Example: {"sentiment": "positive", "decision": "allow", "reason": "A standard positive customer experience with no policy violations.", "category": "Safe"}"""
 
 async def get_agent_action(client: OpenAI, review_text: str, model_name: str) -> Action:
     """Ask AI to classify the review."""
@@ -104,7 +108,9 @@ async def get_agent_action(client: OpenAI, review_text: str, model_name: str) ->
             
         return Action(
             sentiment=data.get("sentiment", "neutral").lower().strip(),
-            decision=data.get("decision", "allow").lower().strip()
+            decision=data.get("decision", "allow").lower().strip(),
+            reason=data.get("reason", "No reason provided by agent."),
+            category=data.get("category", "Safe")
         )
     except Exception as e:
         # Instead of failing silently, raise the error so the UI can catch it!

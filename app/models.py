@@ -11,6 +11,8 @@ class Action(BaseModel):
     """What the agent must return at each step."""
     sentiment: Literal["positive", "negative", "neutral"]
     decision: Literal["allow", "flag"]
+    reason: str
+    category: Optional[str] = "Safe"
 
 
 class Reward(BaseModel):
@@ -26,6 +28,8 @@ class HistoryEntry(BaseModel):
     review: str
     predicted_sentiment: str
     predicted_decision: str
+    predicted_reason: str
+    predicted_category: str
     true_sentiment: str
     true_decision: str
     reward: float

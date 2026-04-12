@@ -20,6 +20,8 @@ models:
     fields:
       sentiment: "positive | negative | neutral"
       decision: "allow | flag"
+      reason: string
+      category: string
 
   reward:
     module: app.models

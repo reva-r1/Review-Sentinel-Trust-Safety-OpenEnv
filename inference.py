@@ -39,22 +39,24 @@ GRADERS = {
 }
 
 SYSTEM_PROMPT = """You are a Trust & Safety review moderator.
-
-For each customer review you receive, you must return a JSON object with exactly two fields:
-
-1. "sentiment": classify the review as "positive", "negative", or "neutral"
-2. "decision": decide whether to "allow" the review or "flag" it for moderation
-
-Flag a review if it contains:
-- Spam or suspicious links
-- Promotional or paid content disguised as a review
-- Abusive language or personal attacks
-- Fake or incentivized reviews
-
-Otherwise, allow it — even if the sentiment is negative. Negative opinions are fine; policy violations are not.
-
-IMPORTANT: Return ONLY the raw JSON object. No markdown, no explanation, no code blocks.
-Example: {"sentiment": "positive", "decision": "allow"}"""
+ 
+ For each customer review you receive, you must return a JSON object with exactly four fields:
+ 
+ 1. "sentiment": classify the review as "positive", "negative", or "neutral"
+ 2. "decision": decide whether to "allow" the review or "flag" it for moderation
+ 3. "reason": a concise explanation of why you made this decision
+ 4. "category": a specific category for the review (e.g., "Safe", "Toxicity", "Spam", "Phishing", "Hate Speech", "Self-Promotion", "Fake Review")
+ 
+ Flag a review if it contains:
+ - Spam or suspicious links
+ - Promotional or paid content disguised as a review
+ - Abusive language or personal attacks
+ - Fake or incentivized reviews
+ 
+ Otherwise, allow it — even if the sentiment is negative. Negative opinions are fine; policy violations are not.
+ 
+ IMPORTANT: Return ONLY the raw JSON object. No markdown, no explanation, no code blocks.
+ Example: {"sentiment": "positive", "decision": "allow", "reason": "A standard positive customer experience.", "category": "Safe"}"""
 
 
 # ── Logging helpers ───────────────────────────────────────────────────────────
@@ -112,20 +114,22 @@ def get_agent_action(client: OpenAI, review_text: str, history: List[str]) -> Ac
         data = json.loads(raw)
         sentiment = data.get("sentiment", "neutral").lower().strip()
         decision = data.get("decision", "allow").lower().strip()
-
+        reason = data.get("reason", "No reason provided.")
+        category = data.get("category", "Safe")
+ 
         # Validate values
         if sentiment not in ("positive", "negative", "neutral"):
             sentiment = "neutral"
         if decision not in ("allow", "flag"):
             decision = "allow"
-
-        return Action(sentiment=sentiment, decision=decision)
+ 
+        return Action(sentiment=sentiment, decision=decision, reason=reason, category=category)
 
     except Exception as exc:
         # Fallback if LLM request fails or gives garbage
         # This prevents unhandled exceptions from crashing the evaluation
         print(f"[DEBUG] agent error: {exc}", flush=True)
-        return Action(sentiment="neutral", decision="allow")
+        return Action(sentiment="neutral", decision="allow", reason="Error occurred", category="Safe")
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
@@ -149,7 +153,13 @@ async def run_task(client: OpenAI, env: ReviewSentimentEnv, task_name: str):
 
             try:
                 action = get_agent_action(client, review_text, history)
-                action_str = json.dumps({"sentiment": action.sentiment, "decision": action.decision})
+                action_dict = {
+                    "sentiment": action.sentiment,
+                    "decision": action.decision,
+                    "reason": action.reason,
+                    "category": action.category
+                }
+                action_str = json.dumps(action_dict)
 
                 result = await env.step(action)
 
